@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      <Babylon class="js">FPS</Babylon>
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <script type="text/javascript" src="babylon.2.5.js"></script>
+    <script type="text/javascript" src="js/game.js"></script>
+    <script type="text/javascript" src="js/timer.js"></script>
+    <link rel="stylesheet" href="css/hack.css" type="text/css">
+    <linke rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700" type="text/css"></linke>
+  </head>
+  <body><img id="gunsight" src="assets/viseur.png">
+    <div class="gui">
+      <div class="timer">
+        <Temps>:</Temps><span id="time">
+          <0></0></span>
+      </div>
+      <div class="targets">
+        <Cibles>restants:</Cibles><span id="target">
+          <20></20></span>
+      </div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <script type="text/javascript">
+      window.addEventListener('DOMContentLoaded', function(){
+        new Game('canvas');
+      });
+    </script>
+  </body>
+</html>

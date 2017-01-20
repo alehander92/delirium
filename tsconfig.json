@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "system",
+        "outFile": "code.js",
+        "strictNullChecks": true
+    }
+}

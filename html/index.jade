@@ -1,0 +1,35 @@
+doctype html
+html
+  head
+    title
+      Babylon.js FPS
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width, user-scalable=no')
+    
+    script(type='text/javascript' src='babylon.2.5.js')
+    script(type='text/javascript' src='js/game.js')
+    script(type='text/javascript' src='js/timer.js')
+
+    link(rel='stylesheet' href='css/hack.css' type='text/css')
+    linke(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Montserrat:400,700' type='text/css')
+
+  body
+    img#gunsight(src='assets/viseur.png')
+    
+    .gui
+      .timer
+        Temps :
+        span#time
+          0
+      .targets
+        Cibles restants:
+        span#target
+          20
+    
+    canvas#canvas
+    
+    script(type='text/javascript').
+      window.addEventListener('DOMContentLoaded', function(){
+        new Game('canvas');
+      });
+    

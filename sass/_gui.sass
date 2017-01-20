@@ -1,0 +1,31 @@
+
+// Le viseur
+#gunsight
+    position: absolute
+    top: 50%
+    left: 50%
+    margin-top: -37px
+    margin-left: -37px
+    
+// Game GUI main style
+.gui
+    position: absolute
+    z-index: 1
+    margin: 0 0 0 0
+    user-select: none
+    pointer-events:  none
+    
+    .guiElement
+        color: white
+        font-size:  2em
+        @include apply-font(400)
+        text-shadow:  3px 3px 1px #333
+    
+    
+    .timer
+        @extend .guiElement
+        font-size: 3.5em
+        @include apply-font(700)
+    
+    .targets
+        @extend .guiElement

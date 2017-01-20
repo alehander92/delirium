@@ -1,0 +1,37 @@
+doctype html
+html
+  head
+    title
+      Babylon.js FPS
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width, user-scalable=no')
+    
+    script(type='text/javascript' src='src/babylon.2.5.js')
+    script(type='text/javascript' src='js/game.js')
+    script(type='text/javascript' src='js/timer.js')
+
+    link(rel='stylesheet' href='css/main.css' type='text/css')
+    linke(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Montserrat:400,700' type='text/css')
+
+  body
+    <img id="gunsight" src="assets/viseur.png" />
+
+    <!--Contain the game GUI -->
+    <div class="gui">
+        <!--The countdown before the game over screen-->
+        <div class="timer">Temps : <span id="time">0</span></div>
+        <div class="targets">Cibles restantes : <span id="targets">20</span></div>
+    </div>
+    
+    <!--The game canvas-->
+    <canvas id="game-canvas"></canvas>
+
+    <!--Starting the game-->
+    <script>
+        window.addEventListener("DOMContentLoaded", function(){
+            new Game('game-canvas');
+        });
+    </script>
+
+</body>
+</html>
