@@ -3,6 +3,7 @@ class Human {
     health: number;
     camera: BABYLON.Camera;
     potion: Potion;
+    playing: bool;
     mesh: BABYLON.AbstractMesh;
 
     constructor(game: Game, model: string, spawn: BABYLON.Vector3, potion: Potion) {

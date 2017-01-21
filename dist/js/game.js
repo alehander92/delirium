@@ -88,6 +88,11 @@ var Game = (function () {
             var raft3 = _this.newRaft(s, new BABYLON.Vector3(-72, 12, -52), rotation, 3, true);
             var raft4 = _this.newRaft(s, new BABYLON.Vector3(-82, 12, -82), rotation, 2, true); //   let shelf = newShelf()
             var raft5 = _this.newRaft(s, new BABYLON.Vector3(72, 12, 72), rotation, 2, true);
+            _this._loader = new BABYLON.AssetsManager(_this.scene);
+            new Player(_this, 'animation69.babylon', [], new BABYLON.Vector3(0, 0, 0), function (player) {
+                console.log(player);
+            });
+            _this._loader.load();
         };
         this._ground = BABYLON.MeshBuilder.CreateGround('ground1', { width: this.size, height: this.size, subdivisions: 2 }, this.scene);
         this._ground.checkCollisions = true;
@@ -184,6 +189,11 @@ var Game = (function () {
         window.addEventListener('resize', function () {
             _this.engine.resize();
         });
+    };
+    Game.prototype.loadModel = function (model, callback) {
+        var task = this._loader.addMeshTask(model, '', 'assets/', model + ".babylon");
+        task.onSuccess = function (mesh) { callback(mesh.loadedMeshes[0]); };
+        //OPTIMIZE
     };
     Game.prototype.handleKeyboard = function (evt) {
         var gravity = 0.20;

@@ -10,7 +10,7 @@ class Player {
     bascet: {[key: string]: Product};
 
 
-    constructor(game: Game, model: string, checklist: Product[], spawn: BABYLON.Vector3, callback: (Player) => void) {
+    constructor(game: Game, model: string, checklist: Product[], spawn: BABYLON.Vector3, callback: (player: Player) => void) {
         this.game = game;
         this.health = 20;
         this.camera = game.scene.activeCamera;

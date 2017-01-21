@@ -102,6 +102,11 @@ class Game {
       let raft3 = this.newRaft(s, new BABYLON.Vector3(-72, 12, -52), rotation, 3, true);
       let raft4 = this.newRaft(s, new BABYLON.Vector3(-82, 12, -82), rotation, 2, true);//   let shelf = newShelf()
       let raft5 = this.newRaft(s, new BABYLON.Vector3(72, 12, 72), rotation, 2, true);
+      this._loader = new BABYLON.AssetsManager(this.scene);
+      new Player(this, 'animation69.babylon', [], new BABYLON.Vector3(0, 0, 0), (player) => {
+        console.log(player);
+      });
+      this._loader.load();
     }
     this._ground = <BABYLON.GroundMesh>BABYLON.MeshBuilder.CreateGround('ground1', {width: this.size, height: this.size, subdivisions: 2}, this.scene);
     this._ground.checkCollisions = true;
@@ -210,6 +215,11 @@ class Game {
     });
   }
 
+  loadModel(model: string, callback: (s: BABYLON.AbstractMesh) => void) : void {
+    let task = this._loader.addMeshTask(model, '', 'assets/', `${model}.babylon`);
+    task.onSuccess = (mesh) => { callback((<BABYLON.MeshAssetTask>mesh).loadedMeshes[0]) };
+    //OPTIMIZE
+  }
   handleKeyboard(evt : number) : void {
     let gravity = 0.20;
     let speed = 1;    

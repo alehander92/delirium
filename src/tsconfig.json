@@ -4,6 +4,8 @@
         "player.ts",
         "game.ts", 
         "gun.ts",
-        "product.ts"
+        "product.ts",
+        "human.ts",
+        "potion.ts"
     ]
 }
