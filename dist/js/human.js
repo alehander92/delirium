@@ -30,6 +30,12 @@ var Human = (function () {
     Human.prototype.restart = function () {
         this.isPlaying = true;
     };
+    Human.prototype.show = function () {
+        this.meshes.forEach(function (mesh) { return mesh.isVisible = true; });
+    };
+    Human.prototype.hide = function () {
+        this.meshes.forEach(function (mesh) { return mesh.isVisible = false; });
+    };
     Human.prototype.moveHuman = function (start, final, speed) {
         var _this = this;
         var i = 0;

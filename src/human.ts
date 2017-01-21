@@ -43,6 +43,13 @@ class Human implements Gamer {
     restart(): void {
         this.isPlaying = true;
     }
+
+    show() {
+        this.meshes.forEach((mesh) => mesh.isVisible = true);
+    }
+    hide() {
+        this.meshes.forEach((mesh) => mesh.isVisible = false);
+    }
     moveHuman(start: number, final: number, speed: number) {
         var i = 0;
         let recursion = () => {

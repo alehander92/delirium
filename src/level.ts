@@ -2,6 +2,8 @@ class Level {
     game: Game;
     health: number;
     humans: Human[];
+    config: {[key: string]: any};
+
     humansName: {[key: string]: Human};
     camera: BABYLON.Camera;
     mesh: BABYLON.AbstractMesh;
@@ -9,7 +11,7 @@ class Level {
     checklistLevel: {[key: string]: boolean};
     started: boolean;
         
-    bascet: {[key: string]: Product};
+    basket: {[key: string]: Product};
     name: string;
     difficulty: number;
 
@@ -19,12 +21,13 @@ class Level {
         this.camera = game.scene.activeCamera;
         this.checklist = checklist;
         this.checklistLevel = {};
-        this.bascet = {};
+        this.basket = {};
         this.name = name;
         this.started = false;
         this.humans = [];
         this.humansName = {};
         this.difficulty = 1;
+        this.config = {};
     }
 
 
@@ -45,5 +48,9 @@ class Level {
           human.moveHuman(50, 200, 1.04);
         }
         this.started = true;
+        this.levelSettings();
+    }
+
+    levelSettings(): void {
     }
 }

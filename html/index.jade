@@ -15,6 +15,9 @@ html
     script(type='text/javascript' src='js/gamer.js')
     script(type='text/javascript' src='js/level.js')
     script(type='text/javascript' src='js/unmoving.js')
+    script(type='text/javascript' src='js/shaking_level.js')
+    script(type='text/javascript' src='js/light_level.js')
+    script(type='text/javascript' src='js/hallucination_level.js')
     script(type='text/javascript' src='js/weapon.js')
     
     link(rel='stylesheet' href='css/hack.css' type='text/css')
@@ -29,12 +32,37 @@ html
         span#time
           0
       .targets
-        Cibles restants:
+        Time left
         span#target
-          20
+          80
     
     canvas#canvas
     
+    #check_list
+      #check0.check
+        #name0.
+          potato
+        #ok0.
+          OK
+
+    #stats
+      .stat
+        HEALTH :
+        span#health.
+          20
+      .stat
+        POTION :
+        span#potion.
+          ACID
+    
+    #basket
+      .line.
+        banana
+      .line.
+        potato
+          
+        
+
     script(type='text/javascript').
       window.addEventListener('DOMContentLoaded', function(){
         new Game('canvas');

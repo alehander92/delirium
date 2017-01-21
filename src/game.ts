@@ -121,10 +121,10 @@ class Game {
       // let raft5 = this.newRaft(s, new BABYLON.Vector3(72, 12, 72), rotation, 2, true);
       console.log('raft4');
       this._loader = new BABYLON.AssetsManager(this.scene);
-      this.level = new Level(this, 'level1', [], 20);
-      this.loadModel('xinpang', ((m) => {
+      this.level = new HallucinationLevel(this, 'level1', [], 20);
+      this.loadModel('xinpang', ((m: BABYLON.AbstractMesh[], s: BABYLON.Skeleton[]) => {
         
-        var human = new Human(this, 'xinpang', this.scene.skeletons[0], m, new BABYLON.Vector3(0, 1, 0), new Potion(this, 'a'));
+        var human = new Human(this, 'xinpang', s[0], m, new BABYLON.Vector3(0, 1, 0), new Potion(this, 'a'));
         this.level.humans.push(human);
         this.level.humansName['xinpang'] = human;
         // this.scene.beginAnimation(this.scene.skeletons[0], 50, 200, true, 1);
@@ -259,8 +259,34 @@ class Game {
   }
 
   animate() : void {
+    var i = 0;
+    var final = 62;
      // run the render loop
     this.engine.runRenderLoop(() => {
+      if (this.level && this.level.config && this.level.config['level']) {
+        if (this.level.config['level'] == 'shaking') {
+          if (i % 4 == 0) {
+            this.camera.position.x += (Math.random() - 0.5) * 4;
+            // this.camera.position.y += (Math.random() - 0.5) * 4
+            this.camera.position.z += (Math.random() - 0.5) * 4
+          }
+        } else if(this.level.config['level'] == 'light') {
+          if (i == final) {
+            let count = Math.ceil(Math.random() * 80);
+            final += count;
+            this.scene.lightsEnabled = !this.scene.lightsEnabled;
+          }
+        } else if(this.level.config['level'] == 'hallucination') {
+          if (i == final && this.level.config['model']) {
+            let count = Math.ceil(Math.random() * 80);
+            final += count;
+            // this.level.config['model']
+          }
+        }
+        
+      }
+      i += 1;
+
       this.scene.render();
     });
 
@@ -270,9 +296,9 @@ class Game {
     });
   }
 
-  loadModel(model: string, callback: (s: BABYLON.AbstractMesh[]) => void) : void {
+  loadModel(model: string, callback: (m: BABYLON.AbstractMesh[], s: BABYLON.Skeleton[]) => void) : void {
     let task = this._loader.addMeshTask(model, '', 'assets/', `${model}.babylon`);
-    task.onSuccess = (mesh) => { callback((<BABYLON.MeshAssetTask>mesh).loadedMeshes) };
+    task.onSuccess = (mesh) => { callback((<BABYLON.MeshAssetTask>mesh).loadedMeshes, (<BABYLON.MeshAssetTask>mesh).loadedSkeletons) };
     //OPTIMIZE
   }
   handleKeyboard(evt : number) : void {
@@ -281,6 +307,14 @@ class Game {
     switch(evt) {
       default: console.log(evt)
     }  
+  }
+
+  resetLoader() {
+    this._loader = new BABYLON.AssetsManager(this.scene);
+  }
+
+  load() {
+    this._loader.load();
   }
 }
 

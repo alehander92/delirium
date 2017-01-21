@@ -100,9 +100,9 @@ var Game = (function () {
             // let raft5 = this.newRaft(s, new BABYLON.Vector3(72, 12, 72), rotation, 2, true);
             console.log('raft4');
             _this._loader = new BABYLON.AssetsManager(_this.scene);
-            _this.level = new Level(_this, 'level1', [], 20);
-            _this.loadModel('xinpang', (function (m) {
-                var human = new Human(_this, 'xinpang', _this.scene.skeletons[0], m, new BABYLON.Vector3(0, 1, 0), new Potion(_this, 'a'));
+            _this.level = new HallucinationLevel(_this, 'level1', [], 20);
+            _this.loadModel('xinpang', (function (m, s) {
+                var human = new Human(_this, 'xinpang', s[0], m, new BABYLON.Vector3(0, 1, 0), new Potion(_this, 'a'));
                 _this.level.humans.push(human);
                 _this.level.humansName['xinpang'] = human;
                 // this.scene.beginAnimation(this.scene.skeletons[0], 50, 200, true, 1);
@@ -219,8 +219,33 @@ var Game = (function () {
     };
     Game.prototype.animate = function () {
         var _this = this;
+        var i = 0;
+        var final = 62;
         // run the render loop
         this.engine.runRenderLoop(function () {
+            if (_this.level && _this.level.config && _this.level.config['level']) {
+                if (_this.level.config['level'] == 'shaking') {
+                    if (i % 4 == 0) {
+                        _this.camera.position.x += (Math.random() - 0.5) * 4;
+                        // this.camera.position.y += (Math.random() - 0.5) * 4
+                        _this.camera.position.z += (Math.random() - 0.5) * 4;
+                    }
+                }
+                else if (_this.level.config['level'] == 'light') {
+                    if (i == final) {
+                        var count = Math.ceil(Math.random() * 80);
+                        final += count;
+                        _this.scene.lightsEnabled = !_this.scene.lightsEnabled;
+                    }
+                }
+                else if (_this.level.config['level'] == 'hallucination') {
+                    if (i == final && _this.level.config['model']) {
+                        var count = Math.ceil(Math.random() * 80);
+                        final += count;
+                    }
+                }
+            }
+            i += 1;
             _this.scene.render();
         });
         // the canvas/window resize event handler
@@ -230,7 +255,7 @@ var Game = (function () {
     };
     Game.prototype.loadModel = function (model, callback) {
         var task = this._loader.addMeshTask(model, '', 'assets/', model + ".babylon");
-        task.onSuccess = function (mesh) { callback(mesh.loadedMeshes); };
+        task.onSuccess = function (mesh) { callback(mesh.loadedMeshes, mesh.loadedSkeletons); };
         //OPTIMIZE
     };
     Game.prototype.handleKeyboard = function (evt) {
@@ -239,6 +264,12 @@ var Game = (function () {
         switch (evt) {
             default: console.log(evt);
         }
+    };
+    Game.prototype.resetLoader = function () {
+        this._loader = new BABYLON.AssetsManager(this.scene);
+    };
+    Game.prototype.load = function () {
+        this._loader.load();
     };
     return Game;
 }());

@@ -9,6 +9,10 @@
         "gamer.ts",
         "level.ts",
         "unmoving.ts",
+        "timer.ts",
+        "shaking_level.ts",
+        "light_level.ts",
+        "hallucination_level.ts",
         "weapon.ts"
     ]
 }

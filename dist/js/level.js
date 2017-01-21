@@ -5,12 +5,13 @@ var Level = (function () {
         this.camera = game.scene.activeCamera;
         this.checklist = checklist;
         this.checklistLevel = {};
-        this.bascet = {};
+        this.basket = {};
         this.name = name;
         this.started = false;
         this.humans = [];
         this.humansName = {};
         this.difficulty = 1;
+        this.config = {};
     }
     Level.prototype.restart = function () {
         if (this.started) {
@@ -31,6 +32,9 @@ var Level = (function () {
             human.moveHuman(50, 200, 1.04);
         }
         this.started = true;
+        this.levelSettings();
+    };
+    Level.prototype.levelSettings = function () {
     };
     return Level;
 }());

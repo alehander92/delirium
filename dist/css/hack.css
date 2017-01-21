@@ -35,3 +35,37 @@ html, body {
     font-size: 3.5em;
     font-family: "Montserrat", sans-serif;
     font-weight: 700; }
+
+#check_list {
+  position: absolute;
+  bottom: 80px;
+  left: 80px;
+  height: 200px;
+  width: 200px;
+  background-color: blue; }
+  #check_list .check {
+    font-size: 28px;
+    color: white; }
+
+#basket {
+  position: absolute;
+  bottom: 380px;
+  left: 80px;
+  width: 200px;
+  height: 200px;
+  background-color: yellow; }
+  #basket .line {
+    font-size: 28px;
+    color: black;
+    text-align: right; }
+
+#stats {
+  position: absolute;
+  bottom: 580px;
+  left: 80px;
+  width: 200px;
+  height: 200px;
+  background-color: green; }
+  #stats .stat {
+    font-size: 28px;
+    color: white; }
