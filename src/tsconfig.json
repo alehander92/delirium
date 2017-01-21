@@ -1,0 +1,9 @@
+{
+    "files": [
+        "babylon.2.5.d.ts",
+        "player.ts",
+        "game.ts", 
+        "gun.ts",
+        "product.ts"
+    ]
+}

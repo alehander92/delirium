@@ -5,7 +5,7 @@ var Game = (function () {
         this.scene = new BABYLON.Scene(this.engine);
         this._loader = new BABYLON.AssetsManager(this.scene);
         var a = {};
-        this._assets = a;
+        this.assets = a;
         this._meshes = {};
         this.size = 500;
     }
@@ -68,14 +68,15 @@ var Game = (function () {
         document.addEventListener("mozpointerlockchange", pointerlockchange, false);
         document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
     };
+    //good
+    //var wp = game.assets["gun"][0];
     Game.prototype.initMeshes = function () {
         var _this = this;
-        // this.initMesh("gun", "./assets/", "gun.babylon");
-        // this.initMesh("cat", "./assets/particles/", "SSAOca.babylon");
-        // this.initMesh("main_room", "./assets/rooms", "main_roo.babylon");
         this._loader.addMeshTask('shelf', '', 'assets/', 'e.babylon');
+        this._loader.addMeshTask('object', '', 'assets/', 'gun.babylon');
+        this.scene.debugLayer.show();
         this._loader.load();
-        window.A = this;
+        window.game = this;
         this._loader.onFinish = function () {
             var s = _this.scene.meshes[2];
             _this.camera.position = new BABYLON.Vector3(65, 4, 10);
@@ -159,7 +160,7 @@ var Game = (function () {
         var task = this._loader.addMeshTask(label, "", path, name);
         task.onSuccess = function (task) {
             var t = task;
-            _this._assets[t.name] = t;
+            _this.assets[t.name] = t;
             _this.hide(t);
         };
     };

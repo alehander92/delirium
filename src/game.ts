@@ -5,7 +5,7 @@ class Game {
   public camera: BABYLON.FreeCamera;
   private _light: BABYLON.Light;
   private _loader: BABYLON.AssetsManager;
-  private _assets: {[key: string]: BABYLON.MeshAssetTask};
+  public assets: {[key: string]: BABYLON.MeshAssetTask};
   private _meshes: {[key: string]: BABYLON.Mesh};
   private _ground: BABYLON.GroundMesh;
   controlEnabled: boolean;
@@ -18,7 +18,7 @@ class Game {
     this.scene = new BABYLON.Scene(this.engine);
     this._loader = new BABYLON.AssetsManager(this.scene);
     let a = {};
-    this._assets = a;
+    this.assets = a;
     this._meshes = {};
     this.size = 500;
   }
@@ -83,13 +83,14 @@ class Game {
         document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
     
   }
+  //good
+  //var wp = game.assets["gun"][0];
   initMeshes() : void {
-    // this.initMesh("gun", "./assets/", "gun.babylon");
-    // this.initMesh("cat", "./assets/particles/", "SSAOca.babylon");
-    // this.initMesh("main_room", "./assets/rooms", "main_roo.babylon");
     this._loader.addMeshTask('shelf', '', 'assets/', 'e.babylon');
+    this._loader.addMeshTask('object', '', 'assets/', 'gun.babylon');
+    this.scene.debugLayer.show();
     this._loader.load();
-    (<any>window).A = this;
+    (<any>window).game = this;
     this._loader.onFinish = () => {
       let s = this.scene.meshes[2];
       this.camera.position = new BABYLON.Vector3(65, 4, 10);
@@ -180,7 +181,7 @@ class Game {
     let task = this._loader.addMeshTask(label, "", path, name);
     task.onSuccess = (task) => {
       let t = <BABYLON.MeshAssetTask>task;
-      this._assets[t.name] = t;
+      this.assets[t.name] = t;
       this.hide(t);
     }
   }
