@@ -1,8 +1,9 @@
 /// <reference path="./player.ts" />
 var Gun = (function () {
-    function Gun(game, player) {
+    function Gun(game, player, product) {
         this.game = game;
         this.player = player;
+        this.product = product;
         var wp = game.scene.meshes[3];
         wp.isVisible = true;
         // wp.rotationQuaternion = undefined;
@@ -17,14 +18,14 @@ var Gun = (function () {
         this.canFire = true;
         var particleSys = new BABYLON.ParticleSystem("particles", 100, game.scene);
         particleSys.emitter = this.mesh; // the starting object, the emitter
-        particleSys.particleTexture = new BABYLON.Texture("assets/particles/gunshot_125.png", game.scene);
+        particleSys.particleTexture = new BABYLON.Texture("assets/potato.png", game.scene);
         particleSys.emitRate = 5;
         particleSys.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
         particleSys.minEmitPower = 1;
         particleSys.maxEmitPower = 4;
         particleSys.colorDead = new BABYLON.Color4(1, 1, 0.8, 0.0);
         particleSys.minLifeTime = 0.2;
-        particleSys.maxLifeTime = 0.4;
+        particleSys.maxLifeTime = 0.8;
         particleSys.updateSpeed = 0.02;
         //particleSystem.start();
         this.particleSys = particleSys;
@@ -62,7 +63,7 @@ var Gun = (function () {
         });
     };
     Gun.prototype.fire = function (pick) {
-        if (this.canFire) {
+        if (pick.pickedPoint && this.canFire) {
             if (pick.hit && pick.pickedMesh.name == 'target') {
                 pick.pickedMesh.dispose();
             }

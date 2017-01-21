@@ -9,6 +9,13 @@ var Game = (function () {
         this._meshes = {};
         this.size = 500;
     }
+    Game.prototype.finish = function () {
+        console.log('finish.. wind');
+    };
+    Game.prototype.loseLevel = function () {
+        console.log('just a dust in the wind');
+        this.level.restart();
+    };
     Game.prototype.createScene = function () {
         var _this = this;
         this.camera = this.initCamera(this.scene);
@@ -32,12 +39,15 @@ var Game = (function () {
         camera.inertia = 0.9;
         camera.angularSensibility = 800;
         camera.layerMask = 2;
-        this.controlEnabled = false;
+        this.controlEnabled = true;
         this._canvas.addEventListener('click', function (evt) {
             var width = scene.getEngine().getRenderWidth();
             var height = scene.getEngine().getRenderHeight();
             if (_this.controlEnabled) {
                 var pick = scene.pick(width / 2, height / 2, undefined, false, _this.camera);
+                if (_this.weapon) {
+                    _this.weapon.fire(pick);
+                }
             }
         }, false);
         this.initPointerLock(scene);
@@ -74,7 +84,7 @@ var Game = (function () {
         var _this = this;
         this._loader.addMeshTask('shelf', '', 'assets/', 'e.babylon');
         this._loader.addMeshTask('object', '', 'assets/', 'gun.babylon');
-        this.scene.debugLayer.show();
+        // this.scene.debugLayer.show();
         this._loader.load();
         window.game = this;
         this._loader.onFinish = function () {
@@ -87,17 +97,45 @@ var Game = (function () {
             var raft2 = _this.newRaft(s, new BABYLON.Vector3(-42, 22, -42), rotation, 3, true);
             var raft3 = _this.newRaft(s, new BABYLON.Vector3(-72, 12, -52), rotation, 3, true);
             var raft4 = _this.newRaft(s, new BABYLON.Vector3(-82, 12, -82), rotation, 2, true); //   let shelf = newShelf()
-            var raft5 = _this.newRaft(s, new BABYLON.Vector3(72, 12, 72), rotation, 2, true);
+            // let raft5 = this.newRaft(s, new BABYLON.Vector3(72, 12, 72), rotation, 2, true);
+            console.log('raft4');
             _this._loader = new BABYLON.AssetsManager(_this.scene);
-            new Player(_this, 'animation69.babylon', [], new BABYLON.Vector3(0, 0, 0), function (player) {
-                console.log(player);
-            });
+            _this.level = new Level(_this, 'level1', [], 20);
+            _this.loadModel('xinpang', (function (m) {
+                var human = new Human(_this, 'xinpang', _this.scene.skeletons[0], m, new BABYLON.Vector3(0, 1, 0), new Potion(_this, 'a'));
+                _this.level.humans.push(human);
+                _this.level.humansName['xinpang'] = human;
+                // this.scene.beginAnimation(this.scene.skeletons[0], 50, 200, true, 1);
+            }));
             _this._loader.load();
+            _this.player = undefined;
+            _this.weapon = new Weapon(_this, _this.player, new Product(_this, "jar", _this.scene.meshes[1]));
+            _this._loader.onFinish = function () {
+                setTimeout(function () { return _this.level.applySettings(); }, 200);
+            };
+            var mm = new BABYLON.FreeCamera('minimap', new BABYLON.Vector3(0, 100, 0), _this.scene);
+            mm.setTarget(new BABYLON.Vector3(0.1, 0.1, 0.1));
+            mm.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
+            mm.orthoLeft = -_this.size / 2;
+            mm.orthoRight = _this.size / 2;
+            mm.orthoTop = _this.size / 2;
+            mm.orthoBottom = -_this.size / 2;
+            mm.rotation.x = Math.PI / 2;
+            var xstart = 0.80;
+            var ystart = 0.75;
+            var width = 0.98 - xstart;
+            var heigth = 1 - ystart;
+            mm.viewport = new BABYLON.Viewport(xstart, ystart, width, heigth);
+            _this.scene.activeCameras.push(_this.camera);
+            _this.scene.activeCameras.push(mm);
         };
         this._ground = BABYLON.MeshBuilder.CreateGround('ground1', { width: this.size, height: this.size, subdivisions: 2 }, this.scene);
         this._ground.checkCollisions = true;
         this.newBox('Box1', 5.0, { x: -20, checkCollisions: true }, this.scene);
         // this.newSphere('sasho', {segments: 16, diameter: 2}, {y: 1, checkCollisions: true}, this.scene);
+    };
+    Game.prototype.a = function () {
+        return this.scene.meshes.map(function (v) { return v.name; });
     };
     Game.prototype.newRaft = function (s, position, ro, countObjects, clone) {
         if (clone) {
@@ -192,7 +230,7 @@ var Game = (function () {
     };
     Game.prototype.loadModel = function (model, callback) {
         var task = this._loader.addMeshTask(model, '', 'assets/', model + ".babylon");
-        task.onSuccess = function (mesh) { callback(mesh.loadedMeshes[0]); };
+        task.onSuccess = function (mesh) { callback(mesh.loadedMeshes); };
         //OPTIMIZE
     };
     Game.prototype.handleKeyboard = function (evt) {

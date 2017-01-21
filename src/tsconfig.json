@@ -3,9 +3,12 @@
         "babylon.2.5.d.ts",
         "player.ts",
         "game.ts", 
-        "gun.ts",
         "product.ts",
         "human.ts",
-        "potion.ts"
+        "potion.ts",
+        "gamer.ts",
+        "level.ts",
+        "unmoving.ts",
+        "weapon.ts"
     ]
 }

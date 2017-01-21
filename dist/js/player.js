@@ -1,19 +1,22 @@
 var Player = (function () {
     function Player(game, model, checklist, spawn, callback) {
-        var _this = this;
+        console.log('load');
         this.game = game;
         this.health = 20;
         this.camera = game.scene.activeCamera;
+        this.isPlaying = true;
         this.checklist = checklist;
         this.checklistLevel = {};
         this.bascet = {};
-        this.game.loadModel(model, function (mesh) {
-            _this.mesh = mesh;
-            callback(_this);
-        });
+        console.log('load');
+        // this.game.loadModel(model, (meshes) => {
+        //     this.meshes = meshes;
+        //     callback(this);
+        // });
     }
     // finish play
     Player.prototype.finish = function () {
+        this.isPlaying = false;
         console.log('finish');
     };
     return Player;

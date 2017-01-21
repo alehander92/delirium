@@ -3,17 +3,20 @@
 class Gun {
     public game: Game;
     particleSys: BABYLON.ParticleSystem;
-    player: Player;
+    player: Gamer;
     mesh: BABYLON.AbstractMesh;
     fireRate: number;
 
     canFire: boolean;
 
+    product: Product;
+
     private _currentFireRate: number;
     private _initialRotation: BABYLON.Vector3;
-    constructor(game: Game, player: Player) {
+    constructor(game: Game, player: Gamer, product: Product) {
         this.game = game;
         this.player = player;
+        this.product = product;
 
         let wp = game.scene.meshes[3];
         wp.isVisible = true;
@@ -32,7 +35,7 @@ class Gun {
 
         var particleSys = new BABYLON.ParticleSystem("particles", 100, game.scene);
         particleSys.emitter = this.mesh; // the starting object, the emitter
-        particleSys.particleTexture = new BABYLON.Texture("assets/particles/gunshot_125.png", game.scene);
+        particleSys.particleTexture = new BABYLON.Texture("assets/potato.png", game.scene);
         particleSys.emitRate = 5;
         particleSys.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
         particleSys.minEmitPower = 1;
@@ -40,7 +43,7 @@ class Gun {
         particleSys.colorDead = new BABYLON.Color4(1, 1, 0.8, 0.0);
 
         particleSys.minLifeTime = 0.2;
-        particleSys.maxLifeTime = 0.4;
+        particleSys.maxLifeTime = 0.8;
 
         particleSys.updateSpeed = 0.02;
         //particleSystem.start();
@@ -86,7 +89,7 @@ class Gun {
     }
 
     fire(pick: BABYLON.PickingInfo) : void {
-        if (this.canFire) {
+        if (pick.pickedPoint && this.canFire) {
             if (pick.hit && pick.pickedMesh.name == 'target') {
                 (<BABYLON.Mesh>pick.pickedMesh).dispose();
             } else {

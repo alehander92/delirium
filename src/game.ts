@@ -1,8 +1,12 @@
 class Game {
   private _canvas: HTMLCanvasElement;
+  weapon?: Weapon;
+  level?: Level;
+  levels: Level[];
   public engine: BABYLON.Engine;
   public scene: BABYLON.Scene;
   public camera: BABYLON.FreeCamera;
+  player?: Player;
   private _light: BABYLON.Light;
   private _loader: BABYLON.AssetsManager;
   public assets: {[key: string]: BABYLON.MeshAssetTask};
@@ -11,6 +15,13 @@ class Game {
   controlEnabled: boolean;
   size: number;
   
+  finish() : void {
+    console.log('finish.. wind');
+  }
+  loseLevel() : void {
+    console.log('just a dust in the wind');
+    this.level.restart();
+  }
 
   constructor(canvasElement : string) {
     this._canvas = <HTMLCanvasElement>document.querySelector('#canvas');
@@ -45,13 +56,17 @@ class Game {
     camera.inertia = 0.9;
     camera.angularSensibility = 800;
     camera.layerMask = 2;
-    this.controlEnabled = false;
+    this.controlEnabled = true;
     this._canvas.addEventListener('click', (evt) => {
       let width = scene.getEngine().getRenderWidth();
       let height = scene.getEngine().getRenderHeight();
 
       if (this.controlEnabled) { 
         let pick = scene.pick(width/2, height/2, undefined, false, this.camera);
+        if (this.weapon) {
+          this.weapon.fire(pick);
+        }
+      
       }
     }, false);
     this.initPointerLock(scene);
@@ -83,12 +98,14 @@ class Game {
         document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
     
   }
+
+        
   //good
   //var wp = game.assets["gun"][0];
   initMeshes() : void {
     this._loader.addMeshTask('shelf', '', 'assets/', 'e.babylon');
     this._loader.addMeshTask('object', '', 'assets/', 'gun.babylon');
-    this.scene.debugLayer.show();
+    // this.scene.debugLayer.show();
     this._loader.load();
     (<any>window).game = this;
     this._loader.onFinish = () => {
@@ -101,18 +118,56 @@ class Game {
       let raft2 = this.newRaft(s, new BABYLON.Vector3(-42, 22, -42), rotation, 3, true);
       let raft3 = this.newRaft(s, new BABYLON.Vector3(-72, 12, -52), rotation, 3, true);
       let raft4 = this.newRaft(s, new BABYLON.Vector3(-82, 12, -82), rotation, 2, true);//   let shelf = newShelf()
-      let raft5 = this.newRaft(s, new BABYLON.Vector3(72, 12, 72), rotation, 2, true);
+      // let raft5 = this.newRaft(s, new BABYLON.Vector3(72, 12, 72), rotation, 2, true);
+      console.log('raft4');
       this._loader = new BABYLON.AssetsManager(this.scene);
-      new Player(this, 'animation69.babylon', [], new BABYLON.Vector3(0, 0, 0), (player) => {
-        console.log(player);
-      });
+      this.level = new Level(this, 'level1', [], 20);
+      this.loadModel('xinpang', ((m) => {
+        
+        var human = new Human(this, 'xinpang', this.scene.skeletons[0], m, new BABYLON.Vector3(0, 1, 0), new Potion(this, 'a'));
+        this.level.humans.push(human);
+        this.level.humansName['xinpang'] = human;
+        // this.scene.beginAnimation(this.scene.skeletons[0], 50, 200, true, 1);
+        
+      }));
       this._loader.load();
+      this.player = undefined;
+      this.weapon = new Weapon(this, this.player, new Product(this, "jar", this.scene.meshes[1]));
+      this._loader.onFinish = () => {
+        setTimeout(() => this.level.applySettings(), 200);
+      }
+
+      let mm = new BABYLON.FreeCamera('minimap', new BABYLON.Vector3(0,100,0), this.scene);
+      mm.setTarget(new BABYLON.Vector3(0.1,0.1,0.1));
+      mm.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
+      mm.orthoLeft = -this.size / 2;
+      mm.orthoRight = this.size / 2;
+      mm.orthoTop = this.size / 2;
+      mm.orthoBottom = - this.size / 2;
+      mm.rotation.x = Math.PI / 2;
+      var xstart = 0.80;
+      var ystart = 0.75;
+      var width = 0.98 - xstart;
+      var heigth = 1 - ystart;
+
+      mm.viewport = new BABYLON.Viewport(
+        xstart,
+        ystart,
+        width,
+        heigth
+      );
+      this.scene.activeCameras.push(this.camera);
+      this.scene.activeCameras.push(mm);
     }
     this._ground = <BABYLON.GroundMesh>BABYLON.MeshBuilder.CreateGround('ground1', {width: this.size, height: this.size, subdivisions: 2}, this.scene);
     this._ground.checkCollisions = true;
        
     this.newBox('Box1', 5.0, {x: -20, checkCollisions: true}, this.scene);
     // this.newSphere('sasho', {segments: 16, diameter: 2}, {y: 1, checkCollisions: true}, this.scene);
+  }
+
+  a() : string[] {
+    return this.scene.meshes.map((v) => v.name);
   }
 
   newRaft(s: BABYLON.AbstractMesh, position: BABYLON.Vector3, ro: BABYLON.Vector3, countObjects: number, clone: boolean) {
@@ -215,9 +270,9 @@ class Game {
     });
   }
 
-  loadModel(model: string, callback: (s: BABYLON.AbstractMesh) => void) : void {
+  loadModel(model: string, callback: (s: BABYLON.AbstractMesh[]) => void) : void {
     let task = this._loader.addMeshTask(model, '', 'assets/', `${model}.babylon`);
-    task.onSuccess = (mesh) => { callback((<BABYLON.MeshAssetTask>mesh).loadedMeshes[0]) };
+    task.onSuccess = (mesh) => { callback((<BABYLON.MeshAssetTask>mesh).loadedMeshes) };
     //OPTIMIZE
   }
   handleKeyboard(evt : number) : void {
