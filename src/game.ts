@@ -100,6 +100,7 @@ class Game {
       let raft2 = this.newRaft(s, new BABYLON.Vector3(-42, 22, -42), rotation, 3, true);
       let raft3 = this.newRaft(s, new BABYLON.Vector3(-72, 12, -52), rotation, 3, true);
       let raft4 = this.newRaft(s, new BABYLON.Vector3(-82, 12, -82), rotation, 2, true);//   let shelf = newShelf()
+      let raft5 = this.newRaft(s, new BABYLON.Vector3(72, 12, 72), rotation, 2, true);
     }
     this._ground = <BABYLON.GroundMesh>BABYLON.MeshBuilder.CreateGround('ground1', {width: this.size, height: this.size, subdivisions: 2}, this.scene);
     this._ground.checkCollisions = true;

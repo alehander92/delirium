@@ -86,6 +86,7 @@ var Game = (function () {
             var raft2 = _this.newRaft(s, new BABYLON.Vector3(-42, 22, -42), rotation, 3, true);
             var raft3 = _this.newRaft(s, new BABYLON.Vector3(-72, 12, -52), rotation, 3, true);
             var raft4 = _this.newRaft(s, new BABYLON.Vector3(-82, 12, -82), rotation, 2, true); //   let shelf = newShelf()
+            var raft5 = _this.newRaft(s, new BABYLON.Vector3(52, 12, 52), rotation, 2, true);
         };
         this._ground = BABYLON.MeshBuilder.CreateGround('ground1', { width: this.size, height: this.size, subdivisions: 2 }, this.scene);
         this._ground.checkCollisions = true;
