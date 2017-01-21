@@ -98,7 +98,8 @@ class Game {
       let boxes = [this.scene.meshes[1]];
       let raft = this.newRaft(s, new BABYLON.Vector3(0, 11, 0), rotation, 3, false);
       let raft2 = this.newRaft(s, new BABYLON.Vector3(-42, 22, -42), rotation, 3, true);
-    //   let shelf = newShelf()
+      let raft3 = this.newRaft(s, new BABYLON.Vector3(-72, 12, -52), rotation, 3, true);
+      let raft4 = this.newRaft(s, new BABYLON.Vector3(-82, 12, -82), rotation, 2, true);//   let shelf = newShelf()
     }
     this._ground = <BABYLON.GroundMesh>BABYLON.MeshBuilder.CreateGround('ground1', {width: this.size, height: this.size, subdivisions: 2}, this.scene);
     this._ground.checkCollisions = true;
@@ -107,19 +108,48 @@ class Game {
     // this.newSphere('sasho', {segments: 16, diameter: 2}, {y: 1, checkCollisions: true}, this.scene);
   }
 
-//   newRaft(s: BABYLON.AbstractMesh, )
+  newRaft(s: BABYLON.AbstractMesh, position: BABYLON.Vector3, ro: BABYLON.Vector3, countObjects: number, clone: boolean) {
+    if (clone) {
+        s = s.clone('cloning', s.parent);
+    }
+
+    s.position = position;
+    s.rotation = ro;
+    var boxes = [this.newBox('box0', 5.0, {x: s.position.x, y: s.position.y + 0.4, z: s.position.z + 5, checkCollisions: true}, this.scene)];
+    var colors = [new BABYLON.Color3(1, 0, 0), new BABYLON.Color3(0, 1, 0), new BABYLON.Color3(0, 0, 1), new BABYLON.Color3(0.2, 0.2, 0.2)];
+    let l = new BABYLON.StandardMaterial('maer', this.scene);
+    l.diffuseColor = colors[0];
+    boxes[0].material = l;
+    boxes[0].rotation = ro;
+    for(var i = 0;i < countObjects - 1; i ++) {
+        boxes.push(boxes[0].clone(`box${i + 1}`, boxes[0].parent));
+        boxes[i + 1].position = new BABYLON.Vector3(position.x, position.y + 11 + 9 * i, position.z + 5);
+        boxes[i + 1].rotation = ro;
+        let m = new BABYLON.StandardMaterial('material', this.scene);
+        m.diffuseColor = colors[(i + 1) % 4];
+        boxes[i + 1].material = m;
+        
+    }    
+  }
   initLight() : void {
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this._light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), this.scene);
   }
   
-  newBox(box: string, big: number, coords: {x?: number, y?: number, z?: number, checkCollisions?: boolean}, scene: BABYLON.Scene) : void {
+  newBox(box: string, big: number, coords: {x?: number, y?: number, z?: number, checkCollisions?: boolean}, scene: BABYLON.Scene) : BABYLON.Mesh {
     let box1 = BABYLON.Mesh.CreateBox(box, big, scene);
     if (coords.x) {
       box1.position.x = coords.x;
     }
+    if (coords.z) {
+      box1.position.z = coords.z;
+    }
+    if (coords.y) {
+      box1.position.y = coords.y;
+    }
     box1.checkCollisions = coords.checkCollisions ? true : false;
     this._meshes[box] = box1;
+    return box1;
   }
 
   newSphere(sphere: string, data: {segments: number, diameter: number}, coords: {x?: number, y?: number, z?: number, checkCollisions?: boolean}, scene: BABYLON.Scene) : void {
@@ -132,8 +162,8 @@ class Game {
     }
     if (coords.z) {
       s.position.z = coords.z;
-    }
     s.checkCollisions = coords.checkCollisions ? true : false;
+    }
     this._meshes[sphere] = s;
 }
 
