@@ -1,221 +1,208 @@
 class Game {
+  private _canvas: HTMLCanvasElement;
+  public engine: BABYLON.Engine;
+  public scene: BABYLON.Scene;
+  public camera: BABYLON.FreeCamera;
+  private _light: BABYLON.Light;
+  private _loader: BABYLON.AssetsManager;
+  private _assets: {[key: string]: BABYLON.MeshAssetTask};
+  private _meshes: {[key: string]: BABYLON.Mesh};
+  private _ground: BABYLON.GroundMesh;
+  controlEnabled: boolean;
+  size: number;
+  
 
-    private engine  : BABYLON.Engine;
-    public assets   : Array<any>;
-    public scene    : BABYLON.Scene;
-    private time    : number = 0;
-    private timeGui? : HTMLElement;
-    private targetGui? : HTMLElement;
+  constructor(canvasElement : string) {
+    this._canvas = <HTMLCanvasElement>document.querySelector('#canvas');
+    this.engine = new BABYLON.Engine(this._canvas, true);
+    this.scene = new BABYLON.Scene(this.engine);
+    this._loader = new BABYLON.AssetsManager(this.scene);
+    let a = {};
+    this._assets = a;
+    this._meshes = {};
+    this.size = 500;
+  }
+
+  createScene() :  void {
+    this.camera = this.initCamera(this.scene);
+    this.initLight();
+    this.initMeshes();
+    this.initGravity(this.scene, this.camera);
+    window.addEventListener("keyup", (evt) => {
+      this.handleKeyboard(evt.keyCode);
+    });
+  }
+  
+  initCamera(scene: BABYLON.Scene) : BABYLON.FreeCamera {
+    let camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 5,-10), scene);
+    camera.setTarget(BABYLON.Vector3.Zero());
+    camera.attachControl(this._canvas, false);
+    camera.keysUp = [87]; // W
+    camera.keysDown = [83]; // S
+    camera.keysLeft = [65]; // A
+    camera.keysRight = [68]; // D
+    camera.speed = 1;
+    camera.inertia = 0.9;
+    camera.angularSensibility = 800;
+    camera.layerMask = 2;
+    this.controlEnabled = false;
+    this._canvas.addEventListener('click', (evt) => {
+      let width = scene.getEngine().getRenderWidth();
+      let height = scene.getEngine().getRenderHeight();
+
+      if (this.controlEnabled) { 
+        let pick = scene.pick(width/2, height/2, undefined, false, this.camera);
+      }
+    }, false);
+    this.initPointerLock(scene);
+    camera.ellipsoid = new BABYLON.Vector3(2, 2, 2);
+    return camera;
+  }
+
+  initPointerLock(scene: BABYLON.Scene) : void {
+    var canvas = scene.getEngine().getRenderingCanvas();
+      canvas.addEventListener("click", (evt) => {
+          canvas.requestPointerLock = canvas.requestPointerLock || canvas.msRequestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
+          if (canvas.requestPointerLock) {
+            canvas.requestPointerLock();
+          }
+        }, false);
+
+    // Event listener when the pointerlock is updated.
+    var pointerlockchange = (event) => {
+      this.controlEnabled = (document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas || document.msPointerLockElement === canvas || document.pointerLockElement === canvas);
+        if (!this.controlEnabled) {
+          this.camera.detachControl(canvas);
+        } else {
+          this.camera.attachControl(canvas);
+        }
+      };
+        document.addEventListener("pointerlockchange", pointerlockchange, false);
+        document.addEventListener("mspointerlockchange", pointerlockchange, false);
+        document.addEventListener("mozpointerlockchange", pointerlockchange, false);
+        document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
     
-    // Contient toutes les cibles à détruire
-    public targets  : Array<BABYLON.AbstractMesh>;
-
-    constructor(canvasId:string) {
-        
-        let canvas : HTMLCanvasElement = <HTMLCanvasElement> document.getElementById(canvasId);
-        this.engine         = new BABYLON.Engine(canvas, true);
-        // Contiens l'ensemble des assets du jeu autre que l'environnement
-        this.assets         = [];
-        this.targets        = [];
-        // La scène 3D du jeu
-        let timeGui        = document.getElementById('time');
-        if (timeGui) this.timeGui = timeGui;
-
-        let targetGui      = document.getElementById('target');
-        if (targetGui) this.targetGui = targetGui; 
-        // On resize le jeu en fonction de la taille de la fenetre
-        window.addEventListener("resize", () => {
-            this.engine.resize();
-        });
-        this.run();
+  }
+  initMeshes() : void {
+    // this.initMesh("gun", "./assets/", "gun.babylon");
+    // this.initMesh("cat", "./assets/particles/", "SSAOca.babylon");
+    // this.initMesh("main_room", "./assets/rooms", "main_roo.babylon");
+    this._loader.addMeshTask('shelf', '', 'assets/', 'e.babylon');
+    this._loader.load();
+    (<any>window).A = this;
+    this._loader.onFinish = () => {
+      let s = this.scene.meshes[2];
+      this.camera.position = new BABYLON.Vector3(65, 4, 10);
+      this.camera.rotation = new BABYLON.Vector3(-0.1, -2.1, 0);
+      let rotation = new BABYLON.Vector3(1.56, 1.1,  2);
+      let boxes = [this.scene.meshes[1]];
+      let raft = this.newRaft(s, new BABYLON.Vector3(0, 11, 0), rotation, 3, false);
+      let raft2 = this.newRaft(s, new BABYLON.Vector3(-42, 22, -42), rotation, 3, true);
+    //   let shelf = newShelf()
     }
-
-     private initScene() { 
-        // Change camera controls
-        //let cam = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 5,-10), this.scene);
-        //cam.setTarget(BABYLON.Vector3.Zero());
-        //this.scene.activeCamera = cam;
-        let cam = <BABYLON.FreeCamera> this.scene.activeCamera;
-        cam.attachControl(this.engine.getRenderingCanvas());        
-        cam.keysUp = [87];      
-        cam.keysDown = [83];      
-        cam.keysLeft = [65];      
-        cam.keysRight = [63];
-        
-        // Set full screen
-        let setFullScreen = () => {
-            this.engine.isPointerLock = true;
-            window.removeEventListener('click', setFullScreen);
-        }        
-        window.addEventListener('click', setFullScreen);
-        
-        // Skybox
-        var skybox = BABYLON.Mesh.CreateSphere("skyBox", 32, 1000.0, this.scene);
-        skybox.position.y = 50;
-        var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene); 
-        skyboxMaterial.backFaceCulling = false;
-        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("skybox/TropicalSunnyDay", this.scene);
-        skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-        skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-        skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-        skyboxMaterial.disableLighting = true;
-        skybox.material = skyboxMaterial;       
-        skybox.layerMask = 2; // 010 in binary
-        
-        // Gestion des ombres portees
-        let defaultLight = this.scene.getLightByName('Default light');
-        defaultLight.intensity = 0.5;        
-        
-        let dir = new BABYLON.DirectionalLight('dirLight', new BABYLON.Vector3(-0.5,-1,-0.5), this.scene);          
-        dir.position = new BABYLON.Vector3(40, 60, 40);
-        
-        let shadowGenerator = new BABYLON.ShadowGenerator(1024, dir); 
-        shadowGenerator.useBlurVarianceShadowMap = true;
+    this._ground = <BABYLON.GroundMesh>BABYLON.MeshBuilder.CreateGround('ground1', {width: this.size, height: this.size, subdivisions: 2}, this.scene);
+    this._ground.checkCollisions = true;
        
-        // Application des ombres aux maisons et arbre
-        this.scene.meshes.forEach((m) => {
-            if (m.name.indexOf('maison') !== -1 || m.name.indexOf('arbre') !== -1) {
-                shadowGenerator.getShadowMap().renderList.push(m);
-                m.receiveShadows = false;
-            } else {
-                m.receiveShadows = true;
-            }
-        });
-        
-        // Le son de l'arme
-        var gunshot = new BABYLON.Sound("gunshot", "assets/sounds/shot.wav", this.scene, undefined, { loop: false, autoplay: false });
-        this.assets['gunshot'] = gunshot;
+    this.newBox('Box1', 5.0, {x: -20, checkCollisions: true}, this.scene);
+    // this.newSphere('sasho', {segments: 16, diameter: 2}, {y: 1, checkCollisions: true}, this.scene);
+  }
+
+//   newRaft(s: BABYLON.AbstractMesh, )
+  initLight() : void {
+    // create a basic light, aiming 0,1,0 - meaning, to the sky
+    this._light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), this.scene);
+  }
+  
+  newBox(box: string, big: number, coords: {x?: number, y?: number, z?: number, checkCollisions?: boolean}, scene: BABYLON.Scene) : void {
+    let box1 = BABYLON.Mesh.CreateBox(box, big, scene);
+    if (coords.x) {
+      box1.position.x = coords.x;
     }
+    box1.checkCollisions = coords.checkCollisions ? true : false;
+    this._meshes[box] = box1;
+  }
 
-    private run() {
-        BABYLON.SceneLoader.Load('assets/', 'map.babylon', this.engine, (scene) => { 
-            this.scene = scene;
-            this.initScene(); 
-            this.scene.executeWhenReady(() => {
-
-                this.engine.runRenderLoop(() => {
-                    this.scene.render();
-                });
-            });
-            
-            this.initGame();
-            
-            // this.scene.debugLayer.show();
-        });
+  newSphere(sphere: string, data: {segments: number, diameter: number}, coords: {x?: number, y?: number, z?: number, checkCollisions?: boolean}, scene: BABYLON.Scene) : void {
+    let s = BABYLON.MeshBuilder.CreateSphere(sphere, data, scene);
+    if (coords.x) {
+      s.position.x = coords.x;
     }
-
-     private initGame() {
-        // Get weapon
-        this.scene.getMeshByName('blaster').position = new BABYLON.Vector3(0.05, -0.1, 0.4);
-        this.scene.getMeshByName('blaster').parent = this.scene.activeCamera;
-        
-        // Active toutes les cibles de la scène
-        this.scene.meshes.forEach((m) => {
-            if (m.name.indexOf('target') !== -1) {
-                m.isPickable = true; // Pour pouvoir les détruire
-                // m.rotationQuaternion = null;
-                this.targets.push(m);
-            }
-        });
-        
-        var soleil = BABYLON.Mesh.CreateSphere('soleil', 16, 10, this.scene);
-        soleil.position = new BABYLON.Vector3(0, 100, 0);
-        let soleilMaterial = new BABYLON.StandardMaterial('soleilMaterial', this.scene);
-        soleilMaterial.emissiveColor = BABYLON.Color3.Yellow();
-        soleilMaterial.specularColor = BABYLON.Color3.Black();
-        soleil.material = soleilMaterial; 
-        
-        // Rotation infinie de toutes les cibles
-        this.scene.registerBeforeRender(() => {
-            this.targets.forEach((target) => {
-                target.rotation.y += 0.1*this.scene.getAnimationRatio();
-            })
-        })
-        
-        // Active le tir
-        this.scene.onPointerDown = (evt, pr) => {
-            var width = this.scene.getEngine().getRenderWidth();
-            var height = this.scene.getEngine().getRenderHeight(); 
-            var pickInfo = this.scene.pick(width/2, height/2);
-            // Effet sonore
-            this.assets['gunshot'].play();
-            if (pickInfo.hit) {
-                this.destroyTarget(pickInfo.pickedMesh);
-            }
-        }         
-
-        // Minimap
-        let mm = new BABYLON.FreeCamera("minimap", new BABYLON.Vector3(0,100,0), this.scene);
-        mm.setTarget(new BABYLON.Vector3(0,0,0));
-        // Activate the orthographic projection
-        mm.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
-        //These values are required for using an orthographic mode,
-        // and represents the coordinates of the square containing all the camera view.
-        // this.size is the size of our arena
-        mm.orthoLeft = -500/2;
-        mm.orthoRight = 500/2;
-        mm.orthoTop =  500/2;
-        mm.orthoBottom = -500/2;
-        mm.rotation.x = Math.PI/2;
-        // Viewport definition
-        var xstart = 0.8, // 80% from the left
-            ystart = 0.75; // 75% from the bottom
-        var width = 0.99-xstart, // Almost until the right edge of the screen
-            height = 1-ystart;  // Until the top edge of the screen
-
-        mm.viewport = new BABYLON.Viewport(xstart, ystart, width, height );
-        mm.layerMask = 1; // 001 in binary
-        this.scene.activeCamera.layerMask = 2;
-
-        // The representation of player in the minimap
-        var s = BABYLON.Mesh.CreateSphere("player2", 16, 25, this.scene);
-        s.position.y = 50;
-        // The sphere position will be displayed accordingly to the player position
-        this.scene.registerBeforeRender(() => {
-            if (this.scene.activeCameras[0]) {
-                s.position.x = this.scene.activeCameras[0].position.x;
-                s.position.z = this.scene.activeCameras[0].position.z;
-            }
-        });
-
-        var red = new BABYLON.StandardMaterial("red", this.scene);
-        red.diffuseColor = BABYLON.Color3.Red();
-        red.specularColor = BABYLON.Color3.Black();
-        s.material = red;
-        s.layerMask = 1; // 001 in binary : won't be displayed on the player camera, only in the minimap
-
-        // Add the camera to the list of active cameras of the game
-        this.scene.activeCameras.push(this.scene.activeCamera);
-        this.scene.activeCameras.push(mm);
-        
-        // Lance le timer
-        setInterval(this.updateTime.bind(this), 1000);
-        
-        
+    if (coords.y) {
+      s.position.y = coords.y;
     }
-    
-    /**
-     * Efface la cible donnée en paramètre.
-     */
-    private destroyTarget(target) {
-        var index = this.targets.indexOf(target);
-        if (index > -1) {
-            this.targets.splice(index, 1);
-            target.dispose();
-            // Mise à jour de l'interface
-            if (this.targetGui) {
-                this.targetGui.innerHTML = String(this.targets.length);
-            }
-            if (this.targets.length == 0) {
-                // Le jeu est fini !
-            }
-        }
+    if (coords.z) {
+      s.position.z = coords.z;
     }
-    
-    private updateTime() {
-        this.time ++;
-        if (this.timeGui) {
-            this.timeGui.innerHTML = String(this.time);
-        }
-    }
+    s.checkCollisions = coords.checkCollisions ? true : false;
+    this._meshes[sphere] = s;
 }
+
+  initGravity(scene: BABYLON.Scene, camera: BABYLON.FreeCamera) : void {
+    scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
+    camera.applyGravity = true;
+    scene.collisionsEnabled = true;
+    camera.checkCollisions = true;
+    scene.workerCollisions = true;
+  }
+  
+  initMesh(label: string, path: string, name: string) : void {
+    let task = this._loader.addMeshTask(label, "", path, name);
+    task.onSuccess = (task) => {
+      let t = <BABYLON.MeshAssetTask>task;
+      this._assets[t.name] = t;
+      this.hide(t);
+    }
+  }
+
+  show(task: BABYLON.MeshAssetTask) : void {
+    for (var i = 0;i < task.loadedMeshes.length; i++) {
+      task.loadedMeshes[i].isVisible = true;
+    }
+  }
+
+  hide(task: BABYLON.MeshAssetTask) : void {
+    for (var i=0; i < task.loadedMeshes.length; i++ ){
+      task.loadedMeshes[i].isVisible = false;
+    }
+  }
+
+  animate() : void {
+     // run the render loop
+    this.engine.runRenderLoop(() => {
+      this.scene.render();
+    });
+
+    // the canvas/window resize event handler
+    window.addEventListener('resize', () => {
+      this.engine.resize();
+    });
+  }
+
+  handleKeyboard(evt : number) : void {
+    let gravity = 0.20;
+    let speed = 1;    
+    switch(evt) {
+      default: console.log(evt)
+    }  
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Create the game using the 'renderCanvas'
+  let game = new Game('renderCanvas');
+
+  // Create the scene
+  game.createScene();
+
+  // start animation
+  game.animate();
+});
+
+// # style colors 
+// # 3d models products
+// # humans
+// # checklist
+// # health
+// # subs
+// # effects
+// # animation

@@ -1,0 +1,1 @@
+"/home/alehander42/delirium/src/babylon.2.5.d.ts" "/home/alehander42/delirium/src/game.ts" "/home/alehander42/delirium/src/timer.ts" "/home/alehander42/delirium/src/.baseDir.ts" --sourcemap --target ES5 --module system --outDir dist/js
